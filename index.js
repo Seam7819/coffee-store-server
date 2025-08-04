@@ -1,5 +1,5 @@
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config()
 const app = express();
@@ -37,12 +37,61 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/addCoffee/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await coffeeCollection.findOne(query);
+      console.log(id,result);
+      res.send(result)
+    })
+
     app.post('/addCoffee', async(req, res) => {
       const addCoffee = req.body;
       const result = await coffeeCollection.insertOne(addCoffee)
       res.send(result)
     })
 
+    app.delete('/addCoffee/:id',async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await coffeeCollection.deleteOne(query);
+      res.send(result)
+    })
+
+    app.put('/addCoffee/:id',async(req,res)=>{
+      const id = req.params.id;
+      const coffee = req.body;
+      console.log(coffee);
+      const filter = {_id : new ObjectId(id)}
+      const options = {upsert: true};
+      const updateCoffee= {
+        $set: {
+          name : coffee.name,
+          chefName: coffee.chefName,
+          supplier : coffee.supplier,
+          category : coffee.category,
+          details : coffee.details,
+          taste : coffee.taste,
+          photoUrl : coffee.photoUrl
+        }
+      }
+      const result = await coffeeCollection.updateOne(filter,updateCoffee,options)
+      res.send(result)
+    })
+
+    // const id = req.params.id;
+    //   const user = req.body;
+    //   console.log(user,id);
+    //   const filter = {_id : new ObjectId(id)}
+    //   const options = {upsert: true}
+    //   const updateUser = {
+    //     $set : {
+    //       name: user.name,
+    //       email : user.email
+    //     }
+    //   }
+    //   const result = await userCollection.updateOne(filter,updateUser,options);
+    //   res.send(result)
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
